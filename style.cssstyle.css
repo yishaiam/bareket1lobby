@@ -1,0 +1,50 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    color: #333;
+    direction: rtl;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #004080;
+    color: white;
+}
+
+#clock {
+    font-size: 24px;
+}
+
+.content {
+    display: flex;
+    height: 90vh;
+}
+
+.news {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.main {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.side {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+img {
+    max-width: 80%;
+    height: auto;
+    margin-bottom: 20px;
+}
