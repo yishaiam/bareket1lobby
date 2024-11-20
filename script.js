@@ -31,3 +31,29 @@ document.addEventListener("DOMContentLoaded", () => {
     setInterval(updateClock, 1000);
     updateContent();
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+    const adminForm = document.getElementById("admin-form");
+
+    if (adminForm) {
+        adminForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+
+            const image = document.getElementById("image-url").value;
+            const message = document.getElementById("main-message-input").value;
+            const announcements = document.getElementById("announcements-input").value.split(",");
+            const news = document.getElementById("news-input").value.split(",");
+
+            const data = {
+                image,
+                message,
+                announcements,
+                news
+            };
+
+            localStorage.setItem("lobbyData", JSON.stringify(data));
+            alert("התוכן עודכן בהצלחה!");
+        });
+    }
+});
+
