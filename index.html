@@ -9,25 +9,39 @@
 </head>
 <body>
     <div class="header">
-       <h1>ברקת 1 - קהילה שהיא משפחה</h1>
+        <h1>ברקת 1 - קהילה שהיא משפחה</h1>
         <div id="clock"></div>
     </div>
     <div class="content">
+        <!-- מבזקי חדשות -->
         <div class="news">
             <h2>מבזקי חדשות</h2>
             <ul id="news-feed"></ul>
         </div>
+        
+        <!-- תמונה ועדכונים -->
         <div class="main">
             <h2>עדכונים</h2>
-            <img id="main-image" src="" alt="תמונה">
-            <p id="main-message"></p>
+            <img id="main-image" src="" alt="תמונה ראשית" style="width:100%; height:auto;">
+            <p id="main-message">תוכן העדכון יופיע כאן.</p>
         </div>
+        
+        <!-- הודעות לדיירים -->
         <div class="side">
             <h2>הודעות לדיירים</h2>
-            <ul id="announcements"></ul>
+            <ul id="announcements">
+                <li>הודעה לדוגמה 1</li>
+                <li>הודעה לדוגמה 2</li>
+            </ul>
         </div>
     </div>
-<script src="script.js"></script>
+
+    <!-- הפעלת מוסיקה ברקע -->
+    <div style="display:none;">
+        <button onclick="playMusic()">הפעל מוזיקה</button>
+        <button onclick="stopMusic()">עצור מוזיקה</button>
+    </div>
 </body>
 </html>
+
 
