@@ -7,8 +7,8 @@ let currentImageIndex = 0;
 
 // פונקציה לטעינת קישורים מתיקיית Drive
 async function fetchImagesFromDrive() {
-    const folderAPI = `https://www.googleapis.com/drive/v3/files?q='${folderID}'+in+parents&key=${driveApiKey}&fields=files(id,name,mimeType)`;
-    try {
+    const folderAPI = `https://www.googleapis.com/drive/v3/files?q='1MvC29P3waas6UOLOOOaPmHiHz8SL_Xky'+in+parents&key=AIzaSyDJA-7jzqRSqAuBb1Ayz9SsYcKtDkMDUwc&fields=files(id,name,mimeType)`;
+                            try {
         const response = await fetch(folderAPI);
         const data = await response.json();
         
