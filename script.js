@@ -1,64 +1,59 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const clock = document.getElementById("clock");
-    const mainImage = document.getElementById("main-image");
-    const mainMessage = document.getElementById("main-message");
-    const announcements = document.getElementById("announcements");
-    const newsFeed = document.getElementById("news-feed");
+// 1. טעינת תמונות מתיקיית Google Drive והחלפה אוטומטית
+const folderLink = "https://drive.google.com/drive/folders/YOUR_FOLDER_ID";
+const mainImage = document.getElementById("main-image");
+let imageLinks = [];
+let currentImageIndex = 0;
 
-    // פונקציה לעדכון השעון
-    function updateClock() {
-        const now = new Date();
-        clock.textContent = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+// פונקציה לטעינת קישורים מתיקיית Drive
+async function fetchImagesFromDrive() {
+    const folderAPI = `https://www.googleapis.com/drive/v3/files?q='YOUR_FOLDER_ID'+in+parents&key=YOUR_API_KEY&fields=files(id,name,mimeType)`;
+    const response = await fetch(folderAPI);
+    const data = await response.json();
+    
+    // סינון תמונות בלבד
+    imageLinks = data.files
+        .filter(file => file.mimeType.includes("image"))
+        .map(file => `https://drive.google.com/uc?id=${file.id}`);
+    
+    if (imageLinks.length > 0) {
+        mainImage.src = imageLinks[0]; // מציג את התמונה הראשונה
     }
+}
 
-    // עדכון התוכן מהנתונים המקומיים
-    function updateContent() {
-        const data = JSON.parse(localStorage.getItem("lobbyData")) || {
-            image: "",
-            message: "ברוכים הבאים!",
-            announcements: [],
-            news: []
-        };
-
-        mainImage.src = data.image || "https://via.placeholder.com/800x600";
-        mainMessage.textContent = data.message;
-        announcements.innerHTML = data.announcements.map(item => `<li>${item}</li>`).join('');
-        newsFeed.innerHTML = data.news.map(item => `<li>${item}</li>`).join('');
+// החלפת תמונות כל 5 שניות
+function changeImage() {
+    if (imageLinks.length > 0) {
+        currentImageIndex = (currentImageIndex + 1) % imageLinks.length;
+        mainImage.src = imageLinks[currentImageIndex];
     }
+}
 
-    // טעינת התוכן והתחלת שעון
-    updateClock();
-    setInterval(updateClock, 1000);
-    updateContent();
-});
+setInterval(changeImage, 5000); // שינוי תמונה כל 5 שניות
+fetchImagesFromDrive();
 
-document.addEventListener("DOMContentLoaded", () => {
-    const adminForm = document.getElementById("admin-form");
+// 2. השמעת מוזיקה ברקע בלבד
+let audioPlayer;
 
-    if (adminForm) {
-        adminForm.addEventListener("submit", (e) => {
-            e.preventDefault();
-
-            const image = document.getElementById("image-url").value;
-            const message = document.getElementById("main-message-input").value;
-            const announcements = document.getElementById("announcements-input").value.split(",");
-            const news = document.getElementById("news-input").value.split(",");
-
-            const data = {
-                image,
-                message,
-                announcements,
-                news
-            };
-
-            localStorage.setItem("lobbyData", JSON.stringify(data));
-            alert("התוכן עודכן בהצלחה!");
-        });
+function playMusic() {
+    if (!audioPlayer) {
+        audioPlayer = new Audio("https://www.youtube.com/watch?v=YOUR_YOUTUBE_AUDIO_LINK");
+        audioPlayer.loop = true; // חזרה בלולאה
+        audioPlayer.play();
+    } else if (audioPlayer.paused) {
+        audioPlayer.play();
     }
-});
+}
+
+function stopMusic() {
+    if (audioPlayer && !audioPlayer.paused) {
+        audioPlayer.pause();
+    }
+}
+
+// 3. טעינת מבזקי חדשות מאתר "מעריב"
 async function loadNews() {
     const newsFeed = document.getElementById("news-feed");
-    const response = await fetch("https://www.maariv.co.il/Rss/RssCategories/1"); // RSS של מעריב
+    const response = await fetch("https://www.maariv.co.il/Rss/RssCategories/1");
     const text = await response.text();
     const parser = new DOMParser();
     const xml = parser.parseFromString(text, "application/xml");
@@ -80,5 +75,3 @@ async function loadNews() {
 
 loadNews();
 setInterval(loadNews, 60000); // עדכון חדשות כל דקה
-
-
