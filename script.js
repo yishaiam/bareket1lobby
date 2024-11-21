@@ -7,18 +7,20 @@ let currentImageIndex = 0;
 
 // פונקציה לטעינת קישורים מתיקיית Drive
 async function fetchImagesFromDrive() {
-    const folderAPI = `https://www.googleapis.com/drive/v3/files?q='1MvC29P3waas6UOLOOOaPmHiHz8SL_Xky'+in+parents&key=AIzaSyDJA-7jzqRSqAuBb1Ayz9SsYcKtDkMDUwc&fields=files(id,name,mimeType)`;
-                            try {
+    const folderAPI = `https://www.googleapis.com/drive/v3/files?q='${folderID}'+in+parents&key=${driveApiKey}&fields=files(id,name,mimeType)`;
+    try {
         const response = await fetch(folderAPI);
         const data = await response.json();
-        
+
         // סינון תמונות בלבד
         imageLinks = data.files
             .filter(file => file.mimeType.includes("image"))
             .map(file => `https://drive.google.com/uc?id=${file.id}`);
-        
+
         if (imageLinks.length > 0) {
             mainImage.src = imageLinks[0]; // מציג את התמונה הראשונה
+        } else {
+            console.error("לא נמצאו תמונות בתיקיה.");
         }
     } catch (error) {
         console.error("שגיאה בטעינת התמונות מ-Google Drive:", error);
@@ -35,6 +37,7 @@ function changeImage() {
 
 setInterval(changeImage, 5000); // שינוי תמונה כל 5 שניות
 fetchImagesFromDrive();
+
 
 // 2. השמעת מוזיקה ברקע בלבד
 let audioPlayer;
