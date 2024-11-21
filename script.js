@@ -1,5 +1,5 @@
 // 1. טעינת תמונות מתיקיית Google Drive והחלפה אוטומטית
-const folderLink = "https://drive.google.com/drive/folders/YOUR_FOLDER_ID";
+const folderLink = "https://drive.google.com/drive/folders/1MvC29P3waas6UOLOOOaPmHiHz8SL_Xky?usp=drive_link";
 const mainImage = document.getElementById("main-image");
 let imageLinks = [];
 let currentImageIndex = 0;
@@ -36,7 +36,7 @@ let audioPlayer;
 
 function playMusic() {
     if (!audioPlayer) {
-        audioPlayer = new Audio("https://www.youtube.com/watch?v=YOUR_YOUTUBE_AUDIO_LINK");
+        audioPlayer = new Audio("https://www.youtube.com/watch?v=gdoOanw91OM");
         audioPlayer.loop = true; // חזרה בלולאה
         audioPlayer.play();
     } else if (audioPlayer.paused) {
