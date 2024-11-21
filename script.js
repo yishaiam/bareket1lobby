@@ -1,32 +1,31 @@
-const driveApiKey = "AIzaSyDJA-7jzqRSqAuBb1Ayz9SsYcKtDkMDUwc";
-const folderID = "1MvC29P3waas6UOLOOOaPmHiHz8SL_Xky";
+const folderID = "1MvC29P3waas6UOLOOOaPmHiHz8SL_Xky"; // ID התיקייה
+const driveApiKey = "AIzaSyDJA-7jzqRSqAuBb1Ayz9SsYcKtDkMDUwc"; // מפתח ה-API שלך
 const mainImage = document.getElementById("main-image");
 let imageLinks = [];
 let currentImageIndex = 0;
 
-// 1. טעינת תמונות מתיקיית Google Drive
+// פונקציה לטעינת תמונות מהתיקייה
 async function fetchImagesFromDrive() {
     const folderAPI = `https://www.googleapis.com/drive/v3/files?q='${folderID}'+in+parents&key=${driveApiKey}&fields=files(id,name,mimeType)`;
     try {
         const response = await fetch(folderAPI);
         const data = await response.json();
 
-        if (data.files && data.files.length > 0) {
-            // סינון תמונות בלבד
+        if (data.files) {
             imageLinks = data.files
                 .filter(file => file.mimeType.includes("image"))
                 .map(file => `https://drive.google.com/uc?id=${file.id}`);
-
+            
             if (imageLinks.length > 0) {
-                mainImage.src = imageLinks[0]; // מציג את התמונה הראשונה
+                mainImage.src = imageLinks[0]; // הצגת התמונה הראשונה
             } else {
-                console.error("לא נמצאו תמונות בתיקיה.");
+                console.error("No images found in the folder.");
             }
         } else {
-            console.error("התיקיה ריקה או שאין לך הרשאות.");
+            console.error("Failed to retrieve files from Google Drive.");
         }
     } catch (error) {
-        console.error("שגיאה בטעינת התמונות:", error);
+        console.error("Error fetching images:", error);
     }
 }
 
@@ -38,9 +37,9 @@ function changeImage() {
     }
 }
 
-// הפעלת פונקציות טעינת התמונות והחלפתן
-fetchImagesFromDrive();
 setInterval(changeImage, 5000); // שינוי תמונה כל 5 שניות
+fetchImagesFromDrive();
+
 
 // 2. השמעת מוזיקה ברקע בלבד
 let audioPlayer;
