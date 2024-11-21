@@ -56,4 +56,29 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+async function loadNews() {
+    const newsFeed = document.getElementById("news-feed");
+    const response = await fetch("https://www.maariv.co.il/Rss/RssCategories/1"); // RSS של מעריב
+    const text = await response.text();
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(text, "application/xml");
+
+    const items = xml.querySelectorAll("item");
+    newsFeed.innerHTML = "";
+
+    items.forEach((item, index) => {
+        if (index < 5) { // הצגת 5 מבזקים בלבד
+            const title = item.querySelector("title").textContent;
+            const link = item.querySelector("link").textContent;
+
+            const newsItem = document.createElement("li");
+            newsItem.innerHTML = `<a href="${link}" target="_blank">${title}</a>`;
+            newsFeed.appendChild(newsItem);
+        }
+    });
+}
+
+loadNews();
+setInterval(loadNews, 60000); // עדכון חדשות כל דקה
+
 
