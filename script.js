@@ -1,21 +1,36 @@
-const folderID = "1MvC29P3waas6UOLOOOaPmHiHz8SL_Xky"; // ID התיקייה
-const driveApiKey = "AIzaSyDJA-7jzqRSqAuBb1Ayz9SsYcKtDkMDUwc"; // מפתח ה-API שלך
+// הגדרות כלליות
+const folderID = "1MvC29P3waas6UOLOOOaPmHiHz8SL_Xky"; // ID של תיקיית התמונות ב-Google Drive
+const driveApiKey = "AIzaSyDJA-7jzqRSqAuBb1Ayz9SsYcKtDkMDUwc"; // מפתח ה-API של Google Drive
+const rssUrl = "https://www.srugim.co.il/feed"; // כתובת ה-RSS של אתר סרוגים
 const mainImage = document.getElementById("main-image");
+const newsFeed = document.getElementById("news-feed");
 let imageLinks = [];
 let currentImageIndex = 0;
+let audioPlayer;
 
-// פונקציה לטעינת תמונות מהתיקייה
+// פונקציה לטעינת תמונות מ-Google Drive
 async function fetchImagesFromDrive() {
+    console.log("Start fetching images from Drive...");
     const folderAPI = `https://www.googleapis.com/drive/v3/files?q='${folderID}'+in+parents&key=${driveApiKey}&fields=files(id,name,mimeType)`;
+
     try {
         const response = await fetch(folderAPI);
+        console.log("Drive API Response Status:", response.status);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
         const data = await response.json();
+        console.log("Fetched data from Drive:", data);
 
         if (data.files) {
             imageLinks = data.files
                 .filter(file => file.mimeType.includes("image"))
                 .map(file => `https://drive.google.com/uc?id=${file.id}`);
-            
+
+            console.log("Image links:", imageLinks);
+
             if (imageLinks.length > 0) {
                 mainImage.src = imageLinks[0]; // הצגת התמונה הראשונה
             } else {
@@ -33,43 +48,31 @@ async function fetchImagesFromDrive() {
 function changeImage() {
     if (imageLinks.length > 0) {
         currentImageIndex = (currentImageIndex + 1) % imageLinks.length;
+        console.log("Switching to image index:", currentImageIndex);
         mainImage.src = imageLinks[currentImageIndex];
+    } else {
+        console.warn("No images available to switch.");
     }
 }
 
 setInterval(changeImage, 5000); // שינוי תמונה כל 5 שניות
-fetchImagesFromDrive();
 
-
-// 2. השמעת מוזיקה ברקע בלבד
-let audioPlayer;
-
-function playMusic() {
-    if (!audioPlayer) {
-        audioPlayer = new Audio("https://www.youtube.com/watch?v=gdoOanw91OM");
-        audioPlayer.loop = true; // חזרה בלולאה
-        audioPlayer.play();
-    } else if (audioPlayer.paused) {
-        audioPlayer.play();
-    }
-}
-
-function stopMusic() {
-    if (audioPlayer && !audioPlayer.paused) {
-        audioPlayer.pause();
-    }
-}
-
-// פונקציה לטעינת RSS
+// פונקציה לטעינת מבזקים מ-RSS
 async function loadNews() {
-    const newsFeed = document.getElementById("news-feed");
-    const rssUrl = "https://www.srugim.co.il/feed"; // כתובת RSS מעודכנת
+    console.log("Start loading RSS feed...");
     try {
         const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`);
+        console.log("RSS API Response Status:", response.status);
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch RSS. Status: ${response.status}`);
+        }
+
         const data = await response.json();
+        console.log("Fetched RSS data:", data);
+
         const parser = new DOMParser();
         const xml = parser.parseFromString(data.contents, "application/xml");
-
         const items = xml.querySelectorAll("item");
         newsFeed.innerHTML = ""; // ניקוי הרשימה הקיימת
 
@@ -83,12 +86,37 @@ async function loadNews() {
                 newsFeed.appendChild(newsItem);
             }
         });
+
+        console.log("Successfully loaded RSS items.");
     } catch (error) {
         console.error("Error loading RSS feed:", error);
         newsFeed.innerHTML = "<li>לא ניתן לטעון מבזקים כרגע.</li>";
     }
 }
 
-// טעינת RSS כל דקה
+// השמעת מוזיקה ברקע בלבד
+function playMusic() {
+    if (!audioPlayer) {
+        console.log("Starting background music...");
+        audioPlayer = new Audio("https://www.youtube.com/watch?v=gdoOanw91OM");
+        audioPlayer.loop = true; // חזרה בלולאה
+        audioPlayer.play().catch(err => console.error("Error playing music:", err));
+    } else if (audioPlayer.paused) {
+        audioPlayer.play();
+    }
+}
+
+function stopMusic() {
+    if (audioPlayer && !audioPlayer.paused) {
+        console.log("Stopping background music...");
+        audioPlayer.pause();
+    }
+}
+
+// קריאה ראשונית לפונקציות
+fetchImagesFromDrive();
 loadNews();
+playMusic();
+
+// עדכון מבזקים כל דקה
 setInterval(loadNews, 60000); // עדכון כל 60 שניות
