@@ -8,7 +8,7 @@
     <script src="script.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/he.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/hebrew-date@1.0.0/hebrew-date.min.js"></script>
+    <script src="https://unpkg.com/@hebcal/core@3.50.3/dist/bundle.js"></script>
 </head>
 <body>
     <div class="header">
@@ -25,7 +25,7 @@
         <!-- תמונה ועדכונים -->
         <div class="main">
             <h2>עדכונים</h2>
-           <img id="main-image" src="" alt="תמונה" style="max-width: 100%; max-height: 100%;" crossorigin="anonymous">
+           <img id="main-image" src="/api/placeholder/400/320" alt="תמונה" style="max-width: 100%; max-height: 100%;">
             <p id="main-message">תוכן העדכון יופיע כאן.</p>
         </div>
         
@@ -38,30 +38,25 @@
             </ul>
         </div>
     </div>
-
-    <!-- הפעלת מוסיקה ברקע -->
-    <div style="display:none;">
-        <button onclick="playMusic()">הפעל מוזיקה</button>
-        <button onclick="stopMusic()">עצור מוזיקה</button>
-    </div>
-
     <script>
+        // הגדרת השפה העברית ל-moment.js
+        moment.locale('he');
+        
         function updateHeader() {
             const headerTitle = document.getElementById("header-title");
             const now = moment();
-            const gregorianDate = now.format('DD/MM/YYYY'); // תאריך לועזי בתבנית 26/11/2024
-            const time = now.format('HH:mm:ss'); // שעה
-
-            // חישוב התאריך העברי
-            const hebrewDate = new HebrewDate(now.toDate());
-            const hebrewDateString = `${hebrewDate.getDate()} ${hebrewDate.getMonthName()} ${hebrewDate.getFullYear()}`;
-
-            headerTitle.innerHTML = `ברקת 1 - קהילה שהיא משפחה | ${time} | ${gregorianDate} | ${hebrewDateString}`;
+            const gregorianDate = now.format('DD/MM/YYYY');
+            const time = now.format('HH:mm:ss');
+            
+            // חישוב התאריך העברי באמצעות hebcal
+            const hDate = new Hebcal.HDate(new Date());
+            const hebrewDateString = hDate.toString('h');
+            
+            headerTitle.textContent = `ברקת 1 - קהילה שהיא משפחה | ${time} | ${gregorianDate} | ${hebrewDateString}`;
         }
 
         // עדכון הכותרת כל שנייה
         setInterval(updateHeader, 1000);
-
         // קריאה ראשונית לעדכון הכותרת
         updateHeader();
     </script>
