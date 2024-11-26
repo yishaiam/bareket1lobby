@@ -71,15 +71,27 @@ async function loadNews() {
         const data = await response.json();
         console.log("Fetched RSS data:", data);
 
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(data.contents, "application/xml");
-        const items = xml.querySelectorAll("item");
-        newsFeed.innerHTML = ""; // ניקוי הרשימה הקיימת
+        // פענוח Base64 (אם נדרש)
+        const decodedContents = atob(data.contents.split("base64,")[1]);
+        console.log("Decoded RSS contents:", decodedContents);
 
+        // ניתוח ה-XML
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(decodedContents, "application/xml");
+        const items = xml.querySelectorAll("item");
+
+        if (!items || items.length === 0) {
+            console.warn("No RSS items found.");
+            newsFeed.innerHTML = "<li>לא נמצאו מבזקים כרגע.</li>";
+            return;
+        }
+
+        // ניקוי הרשימה הקיימת והוספת מבזקים חדשים
+        newsFeed.innerHTML = "";
         items.forEach((item, index) => {
             if (index < 5) { // הצגת 5 מבזקים בלבד
-                const title = item.querySelector("title").textContent;
-                const link = item.querySelector("link").textContent;
+                const title = item.querySelector("title")?.textContent || "כותרת לא זמינה";
+                const link = item.querySelector("link")?.textContent || "#";
 
                 const newsItem = document.createElement("li");
                 newsItem.innerHTML = `<a href="${link}" target="_blank">${title}</a>`;
@@ -93,6 +105,7 @@ async function loadNews() {
         newsFeed.innerHTML = "<li>לא ניתן לטעון מבזקים כרגע.</li>";
     }
 }
+
 
 // השמעת מוזיקה ברקע בלבד
 function playMusic() {
