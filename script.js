@@ -58,6 +58,9 @@ function changeImage() {
 setInterval(changeImage, 5000); // שינוי תמונה כל 5 שניות
 
 // פונקציה לטעינת מבזקים מ-RSS
+let allNewsItems = []; // מערך לשמירת כל המבזקים
+let currentIndex = 0;
+
 async function loadNews() {
     console.log("Start loading RSS feed...");
     try {
@@ -86,25 +89,52 @@ async function loadNews() {
             return;
         }
 
-        // ניקוי הרשימה הקיימת והוספת מבזקים חדשים
-        newsFeed.innerHTML = "";
-        items.forEach((item, index) => {
-            if (index < 5) { // הצגת 5 מבזקים בלבד
-                const title = item.querySelector("title")?.textContent || "כותרת לא זמינה";
-                const link = item.querySelector("link")?.textContent || "#";
+        // שמירת המבזקים החדשים במערך
+        items.forEach((item) => {
+            const title = item.querySelector("title")?.textContent || "כותרת לא זמינה";
+            const link = item.querySelector("link")?.textContent || "#";
+            const pubDate = item.querySelector("pubDate")?.textContent || "תאריך לא זמין";
 
-                const newsItem = document.createElement("li");
-                newsItem.innerHTML = `<a href="${link}" target="_blank">${title}</a>`;
-                newsFeed.appendChild(newsItem);
-            }
+            allNewsItems.push({ title, link, pubDate });
         });
 
-        console.log("Successfully loaded RSS items.");
+        // שמירת 15 המבזקים האחרונים בלבד
+        allNewsItems = allNewsItems.slice(-15);
+
+        // הצגת 5 המבזקים האחרונים
+        displayNewsItems();
     } catch (error) {
         console.error("Error loading RSS feed:", error);
         newsFeed.innerHTML = "<li>לא ניתן לטעון מבזקים כרגע.</li>";
     }
 }
+
+function displayNewsItems() {
+    newsFeed.innerHTML = "";
+    const itemsToShow = allNewsItems.slice(currentIndex, currentIndex + 5);
+
+    itemsToShow.forEach((item) => {
+        const newsItem = document.createElement("li");
+        newsItem.innerHTML = `<a href="${item.link}" target="_blank">${item.title}</a> <span>${item.pubDate}</span>`;
+        newsFeed.appendChild(newsItem);
+    });
+
+    console.log("Successfully displayed RSS items.");
+}
+
+function rotateNewsItems() {
+    currentIndex = (currentIndex + 5) % allNewsItems.length;
+    displayNewsItems();
+}
+
+// עדכון המבזקים כל דקה
+setInterval(loadNews, 60000);
+
+// תחלופה בין קבוצות של 5 מבזקים כל דקה
+setInterval(rotateNewsItems, 60000);
+
+// קריאה ראשונית לטעינת המבזקים
+loadNews();
 
 
 
