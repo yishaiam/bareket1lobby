@@ -4,8 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>מסך לובי</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="script.js" defer></script>
+    <style>
+        .header {
+            text-align: center;
+            direction: rtl;
+        }
+        #clock-display {
+            font-size: 1.2em;
+            margin-top: 10px;
+        }
+    </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/he.min.js"></script>
     <script src="https://unpkg.com/@hebcal/core@3.50.3/dist/bundle.js"></script>
@@ -13,7 +21,7 @@
 <body>
     <div class="header">
         <h1 id="header-title">ברקת 1 - קהילה שהיא משפחה</h1>
-        <div id="clock"></div>
+        <div id="clock-display"></div>
     </div>
     <div class="content">
         <!-- מבזקי חדשות -->
@@ -38,27 +46,46 @@
             </ul>
         </div>
     </div>
-    <script>
-        // הגדרת השפה העברית ל-moment.js
-        moment.locale('he');
-        
-        function updateHeader() {
-            const headerTitle = document.getElementById("header-title");
-            const now = moment();
-            const gregorianDate = now.format('DD/MM/YYYY');
-            const time = now.format('HH:mm:ss');
-            
-            // חישוב התאריך העברי באמצעות hebcal
-            const hDate = new Hebcal.HDate(new Date());
-            const hebrewDateString = hDate.toString('h');
-            
-            headerTitle.textContent = `ברקת 1 - קהילה שהיא משפחה | ${time} | ${gregorianDate} | ${hebrewDateString}`;
-        }
 
-        // עדכון הכותרת כל שנייה
-        setInterval(updateHeader, 1000);
-        // קריאה ראשונית לעדכון הכותרת
-        updateHeader();
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // וידוא שכל הספריות נטענו
+            if (typeof moment === 'undefined') {
+                console.error('moment.js not loaded');
+                return;
+            }
+            if (typeof Hebcal === 'undefined') {
+                console.error('Hebcal not loaded');
+                return;
+            }
+
+            // הגדרת השפה העברית
+            moment.locale('he');
+            
+            function updateClock() {
+                const clockDisplay = document.getElementById('clock-display');
+                const now = new Date();
+                
+                // זמן נוכחי
+                const time = moment().format('HH:mm:ss');
+                
+                // תאריך לועזי
+                const gregorianDate = moment().format('DD/MM/YYYY');
+                
+                // תאריך עברי
+                const hDate = new Hebcal.HDate();
+                const hebrewDateString = hDate.toString('h');
+                
+                // עדכון התצוגה
+                clockDisplay.textContent = `${time} | ${gregorianDate} | ${hebrewDateString}`;
+            }
+
+            // עדכון ראשוני
+            updateClock();
+            
+            // עדכון כל שנייה
+            setInterval(updateClock, 1000);
+        });
     </script>
 </body>
 </html>
