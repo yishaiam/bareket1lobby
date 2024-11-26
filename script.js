@@ -72,7 +72,7 @@ async function loadNews() {
         console.log("Fetched RSS data:", data);
 
         // פענוח Base64 (אם נדרש)
-        const decodedContents = atob(data.contents.split("base64,")[1]);
+        const decodedContents = decodeURIComponent(escape(atob(data.contents.split("base64,")[1])));
         console.log("Decoded RSS contents:", decodedContents);
 
         // ניתוח ה-XML
@@ -105,6 +105,7 @@ async function loadNews() {
         newsFeed.innerHTML = "<li>לא ניתן לטעון מבזקים כרגע.</li>";
     }
 }
+
 
 
 // השמעת מוזיקה ברקע בלבד
