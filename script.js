@@ -60,8 +60,6 @@ function stopMusic() {
     }
 }
 
-// 3. טעינת מבזקי חדשות מאתר "מעריב"
-
 // פונקציה לטעינת RSS
 async function loadNews() {
     const newsFeed = document.getElementById("news-feed");
