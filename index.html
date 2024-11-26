@@ -4,24 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>מסך לובי</title>
-    <style>
-        .header {
-            text-align: center;
-            direction: rtl;
-        }
-        #clock-display {
-            font-size: 1.2em;
-            margin-top: 10px;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/he.min.js"></script>
-    <script src="https://unpkg.com/@hebcal/core@3.50.3/dist/bundle.js"></script>
 </head>
 <body>
     <div class="header">
         <h1 id="header-title">ברקת 1 - קהילה שהיא משפחה</h1>
-        <div id="clock-display"></div>
+        <div id="clock"></div>
     </div>
     <div class="content">
         <!-- מבזקי חדשות -->
@@ -33,7 +24,7 @@
         <!-- תמונה ועדכונים -->
         <div class="main">
             <h2>עדכונים</h2>
-           <img id="main-image" src="/api/placeholder/400/320" alt="תמונה" style="max-width: 100%; max-height: 100%;">
+           <img id="main-image" src="" alt="תמונה" style="max-width: 100%; max-height: 100%;" crossorigin="anonymous">
             <p id="main-message">תוכן העדכון יופיע כאן.</p>
         </div>
         
@@ -46,38 +37,111 @@
             </ul>
         </div>
     </div>
+    <!-- הפעלת מוסיקה ברקע -->
+    <div style="display:none;">
+        <button onclick="playMusic()">הפעל מוזיקה</button>
+        <button onclick="stopMusic()">עצור מוזיקה</button>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // וידוא שכל הספריות נטענו
-            if (typeof moment === 'undefined') {
-                console.error('moment.js not loaded');
-                return;
-            }
-            if (typeof Hebcal === 'undefined') {
-                console.error('Hebcal not loaded');
-                return;
+            // המרת מספרים לאותיות עבריות
+            function numberToHebrewLetters(num) {
+                const letters = {
+                    1: 'א', 2: 'ב', 3: 'ג', 4: 'ד', 5: 'ה',
+                    6: 'ו', 7: 'ז', 8: 'ח', 9: 'ט', 10: 'י',
+                    20: 'כ', 30: 'ל', 40: 'מ', 50: 'נ',
+                    60: 'ס', 70: 'ע', 80: 'פ', 90: 'צ',
+                    100: 'ק', 200: 'ר', 300: 'ש', 400: 'ת'
+                };
+                
+                if (num === 15) return 'ט״ו';
+                if (num === 16) return 'ט״ז';
+                
+                let result = '';
+                let remaining = num;
+                
+                // מאות
+                while (remaining >= 100) {
+                    const hundreds = Math.floor(remaining / 100) * 100;
+                    if (hundreds <= 400) {
+                        result += letters[hundreds];
+                        remaining -= hundreds;
+                    } else {
+                        result += letters[400];
+                        remaining -= 400;
+                    }
+                }
+                
+                // עשרות
+                if (remaining >= 10) {
+                    const tens = Math.floor(remaining / 10) * 10;
+                    result += letters[tens];
+                    remaining -= tens;
+                }
+                
+                // יחידות
+                if (remaining > 0) {
+                    result += letters[remaining];
+                }
+                
+                // הוספת גרש או גרשיים
+                if (result.length > 1) {
+                    result = result.slice(0, -1) + '"' + result.slice(-1);
+                } else if (result.length === 1) {
+                    result += "'";
+                }
+                
+                return result;
             }
 
-            // הגדרת השפה העברית
-            moment.locale('he');
-            
+            // המרת שנה לפורמט עברי (למשל, התשפ"ד)
+            function formatHebrewYear(year) {
+                const thousands = Math.floor(year / 1000);
+                const remainder = year % 1000;
+                return 'ה' + numberToHebrewLetters(remainder);
+            }
+
             function updateClock() {
-                const clockDisplay = document.getElementById('clock-display');
+                const headerTitle = document.getElementById('header-title');
                 const now = new Date();
                 
                 // זמן נוכחי
-                const time = moment().format('HH:mm:ss');
+                const currentTime = now.toLocaleTimeString('he-IL', { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit',
+                    hour12: false 
+                });
                 
                 // תאריך לועזי
-                const gregorianDate = moment().format('DD/MM/YYYY');
+                const gregorianDate = now.toLocaleDateString('he-IL', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
                 
-                // תאריך עברי
-                const hDate = new Hebcal.HDate();
-                const hebrewDateString = hDate.toString('h');
+                // תאריך עברי - קבלת המספרים
+                const hebrewDate = new Intl.DateTimeFormat('he-IL', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                    calendar: 'hebrew'
+                }).formatToParts(now);
                 
-                // עדכון התצוגה
-                clockDisplay.textContent = `${time} | ${gregorianDate} | ${hebrewDateString}`;
+                // עיבוד התאריך העברי
+                let day = parseInt(hebrewDate.find(part => part.type === 'day').value);
+                const month = hebrewDate.find(part => part.type === 'month').value;
+                let year = parseInt(hebrewDate.find(part => part.type === 'year').value);
+                
+                // המרה לפורמט המבוקש
+                const hebrewDay = numberToHebrewLetters(day);
+                const formattedYear = formatHebrewYear(year);
+                const formattedHebrewDate = `${hebrewDay} ב${month} ${formattedYear}`;
+                
+                // עדכון הכותרת
+                const newTitle = `ברקת 1 - קהילה שהיא משפחה | ${currentTime} | ${gregorianDate} | ${formattedHebrewDate}`;
+                headerTitle.textContent = newTitle;
             }
 
             // עדכון ראשוני
