@@ -8,7 +8,7 @@
     <script src="script.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/he.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/moment-hijri@2.1.1/moment-hijri.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hebrew-date@1.0.0/hebrew-date.min.js"></script>
 </head>
 <body>
     <div class="header">
@@ -49,11 +49,14 @@
         function updateHeader() {
             const headerTitle = document.getElementById("header-title");
             const now = moment();
-            const hebrewDate = now.format('iD iMMMM iYYYY'); // תאריך עברי
-            const gregorianDate = now.format('LL'); // תאריך לועזי
+            const gregorianDate = now.format('DD/MM/YYYY'); // תאריך לועזי בתבנית 26/11/2024
             const time = now.format('HH:mm:ss'); // שעה
 
-            headerTitle.innerHTML = `ברקת 1 - קהילה שהיא משפחה | ${time} | ${gregorianDate} | ${hebrewDate}`;
+            // חישוב התאריך העברי
+            const hebrewDate = new HebrewDate(now.toDate());
+            const hebrewDateString = `${hebrewDate.getDate()} ${hebrewDate.getMonthName()} ${hebrewDate.getFullYear()}`;
+
+            headerTitle.innerHTML = `ברקת 1 - קהילה שהיא משפחה | ${time} | ${gregorianDate} | ${hebrewDateString}`;
         }
 
         // עדכון הכותרת כל שנייה
