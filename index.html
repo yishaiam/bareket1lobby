@@ -20,6 +20,11 @@
             <h2>מבזקי חדשות</h2>
             <ul id="news-feed"></ul>
         </div>
+        <!-- מזג האוויר -->
+        <div class="weather">
+            <h2>מזג האוויר בבאר יעקב</h2>
+            <div id="weather"></div>
+        </div>
         <!-- תמונה ועדכונים -->
         <div class="main">
             <h2>עדכונים</h2>
@@ -33,11 +38,6 @@
                 <li>הודעה לדוגמה 1</li>
                 <li>הודעה לדוגמה 2</li>
             </ul>
-        </div>
-        <!-- מזג האוויר -->
-        <div class="weather">
-            <h2>מזג האוויר בבאר יעקב</h2>
-            <div id="weather"></div>
         </div>
     </div>
     <!-- הפעלת מוסיקה ברקע -->
@@ -82,7 +82,7 @@
                 // הוספת גרש או גרשיים
                 if (result.length > 1) {
                     result = result.slice(0, -1) + '"' + result.slice(-1);
-                } else אם (result.length === 1) {
+                } else if (result.length === 1) {
                     result += "'";
                 }
                 return result;
@@ -134,9 +134,16 @@
                 const today = data.daily;
                 const nextDays = data.daily.slice(1, 4);
 
-                let weatherHTML = `<p>היום: מקסימום ${today.temperature_2m_max[0]}°C, מינימום ${today.temperature_2m_min[0]}°C, סיכוי לגשם ${today.precipitation_sum[0]} מ"מ, מהירות רוח ${today.windspeed_10m_max[0]} קמ"ש</p>`;
+                const daysOfWeek = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+                const now = new Date();
+                const todayIndex = now.getDay();
+
+                let weatherHTML = `<p>${daysOfWeek[todayIndex]} ${now.toLocaleDateString('he-IL')}: מקסימום ${today.temperature_2m_max[0]}°C, מינימום ${today.temperature_2m_min[0]}°C, סיכוי לגשם ${today.precipitation_sum[0]} מ"מ, מהירות רוח ${today.windspeed_10m_max[0]} קמ"ש</p>`;
                 nextDays.forEach((day, index) => {
-                    weatherHTML += `<p>יום ${index + 1}: מקסימום ${day.temperature_2m_max}°C, מינימום ${day.temperature_2m_min}°C, סיכוי לגשם ${day.precipitation_sum} מ"מ, מהירות רוח ${day.windspeed_10m_max} קמ"ש</p>`;
+                    const date = new Date(now);
+                    date.setDate(now.getDate() + index + 1);
+                    const dayIndex = (todayIndex + index + 1) % 7;
+                    weatherHTML += `<p>${daysOfWeek[dayIndex]} ${date.toLocaleDateString('he-IL')}: מקסימום ${day.temperature_2m_max[index + 1]}°C, מינימום ${day.temperature_2m_min[index + 1]}°C, סיכוי לגשם ${day.precipitation_sum[index + 1]} מ"מ, מהירות רוח ${day.windspeed_10m_max[index + 1]} קמ"ש</p>`;
                 });
 
                 weatherContainer.innerHTML = weatherHTML;
