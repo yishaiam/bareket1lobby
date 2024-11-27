@@ -82,7 +82,7 @@
                 // הוספת גרש או גרשיים
                 if (result.length > 1) {
                     result = result.slice(0, -1) + '"' + result.slice(-1);
-                } else if (result.length === 1) {
+                } else אם (result.length === 1) {
                     result += "'";
                 }
                 return result;
@@ -117,7 +117,7 @@
             setInterval(updateClock, 1000);
 
             // משיכת נתוני מזג האוויר
-            const apiUrl = 'https://api.open-meteo.com/v1/forecast?latitude=31.933&longitude=34.838&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=Asia/Jerusalem';
+            const apiUrl = 'https://api.open-meteo.com/v1/forecast?latitude=31.933&longitude=34.838&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max&timezone=Asia/Jerusalem';
 
             async function fetchWeather() {
                 try {
@@ -131,13 +131,12 @@
 
             function displayWeather(data) {
                 const weatherContainer = document.getElementById('weather');
-                const today = data.daily.temperature_2m_max[0];
-                const nextDays = data.daily.temperature_2m_max.slice(1, 4);
+                const today = data.daily;
+                const nextDays = data.daily.slice(1, 4);
 
-                let weatherHTML = `<h2>מזג האוויר בבאר יעקב</h2>`;
-                weatherHTML += `<p>היום: ${today}°C</p>`;
-                nextDays.forEach((temp, index) => {
-                    weatherHTML += `<p>יום ${index + 1}: ${temp}°C</p>`;
+                let weatherHTML = `<p>היום: מקסימום ${today.temperature_2m_max[0]}°C, מינימום ${today.temperature_2m_min[0]}°C, סיכוי לגשם ${today.precipitation_sum[0]} מ"מ, מהירות רוח ${today.windspeed_10m_max[0]} קמ"ש</p>`;
+                nextDays.forEach((day, index) => {
+                    weatherHTML += `<p>יום ${index + 1}: מקסימום ${day.temperature_2m_max}°C, מינימום ${day.temperature_2m_min}°C, סיכוי לגשם ${day.precipitation_sum} מ"מ, מהירות רוח ${day.windspeed_10m_max} קמ"ש</p>`;
                 });
 
                 weatherContainer.innerHTML = weatherHTML;
