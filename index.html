@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="he">
 <head>
@@ -7,26 +6,151 @@
     <title>מסך לובי</title>
     <link rel="stylesheet" href="style.css">
     <script src="script.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/he.min.js"></script>
 </head>
 <body>
     <div class="header">
         <h1 id="header-title">ברקת 1 - קהילה שהיא משפחה</h1>
+        <div id="clock"></div>
     </div>
     <div class="content">
+        <!-- מבזקי חדשות -->
         <div class="news">
             <h2>מבזקי חדשות</h2>
-            <div class="news-marquee">
-                <ul id="news-feed"></ul>
-            </div>
+            <ul id="news-feed"></ul>
         </div>
+        <!-- מזג האוויר -->
         <div class="weather">
             <h2>מזג האוויר בבאר יעקב</h2>
-            <div class="weather-marquee" id="weather"></div>
+            <div id="weather"></div>
         </div>
+        <!-- תמונה ועדכונים -->
         <div class="main">
             <h2>עדכונים</h2>
-            <img id="main-image" src="" alt="תמונה" style="max-width: 100%; max-height: 100%;">
+            <img id="main-image" src="" alt="תמונה" style="max-width: 100%; max-height: 100%;" crossorigin="anonymous">
+            <p id="main-message">תוכן העדכון יופיע כאן.</p>
+        </div>
+        <!-- הודעות לדיירים -->
+        <div class="side">
+            <h2>הודעות לדיירים</h2>
+            <ul id="announcements">
+                <li>הודעה לדוגמה 1</li>
+                <li>הודעה לדוגמה 2</li>
+            </ul>
         </div>
     </div>
+    <!-- הפעלת מוסיקה ברקע -->
+    <div style="display:none;">
+        <button onclick="playMusic()">הפעל מוזיקה</button>
+        <button onclick="stopMusic()">עצור מוזיקה</button>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // המרת מספרים לאותיות עבריות
+            function numberToHebrewLetters(num) {
+                const letters = {
+                    1: 'א', 2: 'ב', 3: 'ג', 4: 'ד', 5: 'ה', 6: 'ו', 7: 'ז', 8: 'ח', 9: 'ט', 10: 'י',
+                    20: 'כ', 30: 'ל', 40: 'מ', 50: 'נ', 60: 'ס', 70: 'ע', 80: 'פ', 90: 'צ', 100: 'ק',
+                    200: 'ר', 300: 'ש', 400: 'ת'
+                };
+                if (num === 15) return 'ט״ו';
+                if (num === 16) return 'ט״ז';
+                let result = '';
+                let remaining = num;
+                // מאות
+                while (remaining >= 100) {
+                    const hundreds = Math.floor(remaining / 100) * 100;
+                    if (hundreds <= 400) {
+                        result += letters[hundreds];
+                        remaining -= hundreds;
+                    } else {
+                        result += letters[400];
+                        remaining -= 400;
+                    }
+                }
+                // עשרות
+                if (remaining >= 10) {
+                    const tens = Math.floor(remaining / 10) * 10;
+                    result += letters[tens];
+                    remaining -= tens;
+                }
+                // יחידות
+                if (remaining > 0) {
+                    result += letters[remaining];
+                }
+                // הוספת גרש או גרשיים
+                if (result.length > 1) {
+                    result = result.slice(0, -1) + '"' + result.slice(-1);
+                } else if (result.length === 1) {
+                    result += "'";
+                }
+                return result;
+            }
+            // המרת שנה לפורמט עברי (למשל, התשפ"ד)
+            function formatHebrewYear(year) {
+                const thousands = Math.floor(year / 1000);
+                const remainder = year % 1000;
+                return 'ה' + numberToHebrewLetters(remainder);
+            }
+            function updateClock() {
+                const headerTitle = document.getElementById('header-title');
+                const now = new Date(); // זמן נוכחי
+                const currentTime = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }); // תאריך לועזי
+                const gregorianDate = now.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' }); // תאריך עברי - קבלת המספרים
+                const hebrewDate = new Intl.DateTimeFormat('he-IL', { day: 'numeric', month: 'long', year: 'numeric', calendar: 'hebrew' }).formatToParts(now);
+                // עיבוד התאריך העברי
+                let day = parseInt(hebrewDate.find(part => part.type === 'day').value);
+                const month = hebrewDate.find(part => part.type === 'month').value;
+                let year = parseInt(hebrewDate.find(part => part.type === 'year').value);
+                // המרה לפורמט המבוקש
+                const hebrewDay = numberToHebrewLetters(day);
+                const formattedYear = formatHebrewYear(year);
+                const formattedHebrewDate = `${hebrewDay} ב${month} ${formattedYear}`;
+                // עדכון הכותרת
+                const newTitle = `ברקת 1 - קהילה שהיא משפחה | ${currentTime} | ${gregorianDate} | ${formattedHebrewDate}`;
+                headerTitle.textContent = newTitle;
+            }
+            // עדכון ראשוני
+            updateClock();
+            // עדכון כל שנייה
+            setInterval(updateClock, 1000);
+
+            // משיכת נתוני מזג האוויר
+            const apiUrl = 'https://api.open-meteo.com/v1/forecast?latitude=31.933&longitude=34.838&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max&timezone=Asia/Jerusalem';
+
+            async function fetchWeather() {
+                try {
+                    const response = await fetch(apiUrl);
+                    const data = await response.json();
+                    displayWeather(data);
+                } catch (error) {
+                    console.error('Error fetching weather data:', error);
+                }
+            }
+
+            function displayWeather(data) {
+                const weatherContainer = document.getElementById('weather');
+                const today = data.daily;
+                const nextDays = data.daily.slice(1, 4);
+
+                const daysOfWeek = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+                const now = new Date();
+                const todayIndex = now.getDay();
+
+                let weatherHTML = `<p>${daysOfWeek[todayIndex]} ${now.toLocaleDateString('he-IL')}: מקסימום ${today.temperature_2m_max[0]}°C, מינימום ${today.temperature_2m_min[0]}°C, סיכוי לגשם ${today.precipitation_sum[0]} מ"מ, מהירות רוח ${today.windspeed_10m_max[0]} קמ"ש</p>`;
+                nextDays.forEach((day, index) => {
+                    const date = new Date(now);
+                    date.setDate(now.getDate() + index + 1);
+                    const dayIndex = (todayIndex + index + 1) % 7;
+                    weatherHTML += `<p>${daysOfWeek[dayIndex]} ${date.toLocaleDateString('he-IL')}: מקסימום ${day.temperature_2m_max[index + 1]}°C, מינימום ${day.temperature_2m_min[index + 1]}°C, סיכוי לגשם ${day.precipitation_sum[index + 1]} מ"מ, מהירות רוח ${day.windspeed_10m_max[index + 1]} קמ"ש</p>`;
+                });
+
+                weatherContainer.innerHTML = weatherHTML;
+            }
+
+            fetchWeather();
+        });
+    </script>
 </body>
 </html>
