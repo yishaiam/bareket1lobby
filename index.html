@@ -119,34 +119,40 @@
             // משיכת נתוני מזג האוויר
             const apiUrl = 'https://api.open-meteo.com/v1/forecast?latitude=31.933&longitude=34.838&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max&timezone=Asia/Jerusalem';
 
-            async function fetchWeather() {
-                try {
-                    const response = await fetch(apiUrl);
-                    const data = await response.json();
-                    displayWeather(data);
-                } catch (error) {
-                    console.error('Error fetching weather data:', error);
-                }
-            }
+ async function fetchWeather() {
+    try {
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+        displayWeather(data.daily);
+    } catch (error) {
+        console.error('Error fetching weather data:', error);
+        document.getElementById('weather').innerHTML = "לא ניתן להציג את נתוני מזג האוויר כרגע.";
+    }
+}
 
-            function displayWeather(data) {
-                const weatherContainer = document.getElementById('weather');
-                const today = data.daily;
-                const nextDays = data.daily.slice(1, 4);
+function displayWeather(dailyData) {
+    const weatherContainer = document.getElementById('weather');
+    const daysOfWeek = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+    const now = new Date();
+    let weatherHTML = "";
 
-                const daysOfWeek = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
-                const now = new Date();
-                const todayIndex = now.getDay();
+    for (let i = 0; i < 4; i++) {
+        const date = new Date(now);
+        date.setDate(now.getDate() + i);
+        const dayIndex = (now.getDay() + i) % 7;
+        const maxTemp = dailyData.temperature_2m_max[i];
+        const minTemp = dailyData.temperature_2m_min[i];
+        const precipitation = dailyData.precipitation_sum[i] || 0;
+        const windSpeed = dailyData.windspeed_10m_max[i];
 
-                let weatherHTML = `<p>${daysOfWeek[todayIndex]} ${now.toLocaleDateString('he-IL')}: מקסימום ${today.temperature_2m_max[0]}°C, מינימום ${today.temperature_2m_min[0]}°C, סיכוי לגשם ${today.precipitation_sum[0]} מ"מ, מהירות רוח ${today.windspeed_10m_max[0]} קמ"ש</p>`;
-                nextDays.forEach((day, index) => {
-                    const date = new Date(now);
-                    date.setDate(now.getDate() + index + 1);
-                    const dayIndex = (todayIndex + index + 1) % 7;
-                    weatherHTML += `<p>${daysOfWeek[dayIndex]} ${date.toLocaleDateString('he-IL')}: מקסימום ${day.temperature_2m_max[index + 1]}°C, מינימום ${day.temperature_2m_min[index + 1]}°C, סיכוי לגשם ${day.precipitation_sum[index + 1]} מ"מ, מהירות רוח ${day.windspeed_10m_max[index + 1]} קמ"ש</p>`;
-                });
+        weatherHTML += `<p>${daysOfWeek[dayIndex]} ${date.toLocaleDateString('he-IL')}:
+            מקסימום ${maxTemp}°C, מינימום ${minTemp}°C,
+            גשם ${precipitation} מ"מ, רוח ${windSpeed} קמ"ש</p>`;
+    }
+    weatherContainer.innerHTML = weatherHTML;
+}
 
-                weatherContainer.innerHTML = weatherHTML;
+
             }
 
             fetchWeather();
