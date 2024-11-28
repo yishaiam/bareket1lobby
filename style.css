@@ -1,50 +1,35 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
-    color: #333;
     direction: rtl;
+    text-align: center;
 }
 
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    background-color: #004080;
+.header h1 {
+    background-color: #4CAF50;
     color: white;
+    padding: 10px;
 }
 
-#clock {
-    font-size: 24px;
+.news-marquee, .weather-marquee {
+    overflow: hidden;
+    white-space: nowrap;
 }
 
-.content {
-    display: flex;
-    height: 90vh;
+.news-marquee ul, .weather-marquee p {
+    display: inline-block;
+    animation: scroll 15s linear infinite;
 }
 
-.news {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
+.news-marquee ul li, .weather-marquee p {
+    display: inline;
+    margin-right: 50px;
 }
 
-.main {
-    flex: 2;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.side {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-}
-
-img {
-    max-width: 80%;
-    height: auto;
-    margin-bottom: 20px;
+@keyframes scroll {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(-100%);
+    }
 }
